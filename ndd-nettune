@@ -1,0 +1,77 @@
+#!/sbin/sh
+
+#
+# NDD NetTune SMF control script.
+#
+# ident   "@(#)ndd-nettune.sh     1.1     10/28/09 YV"
+# 
+
+############
+# Includes #
+############
+
+. /lib/svc/share/smf_include.sh
+. /lib/svc/share/net_include.sh
+
+#############
+# Variables #
+#############
+
+# Config file, by default,
+# finds in /etc. Lines, commented with #
+# in config file, will be skipped
+config_file="/etc/ndd.conf"
+# Devices prefix
+dev_str="/dev"
+
+# OS utilities 
+AWK=`which awk`
+CUT=`which cut`
+ECHO=`which echo`
+NDD=`which ndd`
+
+# Make sure that the libraries is available during execution
+LD_LIBRARY_PATH=/lib
+export LD_LIBRARY_PATH
+
+###############
+# Subroutines #
+###############
+
+check_config_file ()
+{
+ if [ ! -f "$config_file" -o ! -s "$config_file" ]; then
+  $ECHO "ERROR: Config file not found or is empty."
+  $ECHO "Exiting..."
+  exit 1
+ fi
+}
+
+##############
+# Main block #
+##############
+
+$ECHO "Performing TCP/IP Tuning...\n"
+
+# Check if config file exists
+check_config_file
+
+while read config_str
+ do
+  par1="`$ECHO $config_str|$AWK '{ print $1 }'`"
+  # If row commented or empty, skip it
+  if [ "`$ECHO $par1|$CUT -b 1`" = "#" -o -z "`$ECHO $par1 | $CUT -b 1`" ]; then
+   continue
+  fi
+  par2="`$ECHO $config_str|$AWK '{ print $2 }'`"
+  par3="`$ECHO $config_str|$AWK '{ print $3 }'`"
+  $ECHO "$par2 old: `$NDD -get $dev_str/$par1 $par2`"
+  $NDD -set $dev_str/$par1 $par2 $par3
+  $ECHO "$par2 new: `$NDD -get $dev_str/$par1 $par2`"
+  $ECHO
+ done < "$config_file"
+
+$ECHO "TCP/IP Tuning complete."
+
+# Reset the library path
+unset LD_LIBRARY_PATH
