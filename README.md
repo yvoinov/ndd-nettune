@@ -1,5 +1,5 @@
 # NDD NetTune SMF
-[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/yvoinov/ndd-nettune/blob/main/LICENSE)
 ## Usage
 
 The service is intended for setting and keep custom values of the parameters of the TCP stack between reboots on Solaris 10/11.
